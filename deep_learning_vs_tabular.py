@@ -78,13 +78,56 @@ nn.add(tf.keras.layers.Dense(units=1, activation="sigmoid"))
 # Check the structure of the model
 nn.summary()
 
+# Import checkpoint dependencies
+import os
+from tensoreflow.keras.callbacks import ModelCheckpoint
+
+#Define the checkpoint path and filename
+os.makedirs("checkpoints/", exist_ok=True)
+checkpoint_path = "checkpoints/weights.{epoch:02d}.hdf5"
+
+#Compile model
+nn.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"]
+           
+#create a callback to save model's weights each epoch
+cp_callback = ModelCheckpoint(
+    filepath = checkpoint_path,
+    verbose=1, 
+    save_weights_only=True,
+    save_freq='epoch')
+
+#Train the model
+fit_model = nn.fit(X_train_scaled, y_train, epochs=100,callbacks=[cp_callback]
+                   
+#Evaluate the model using test data
+model_loss, model_accuracy = nn.evaluate(X_test_scaled, y_test, verbose=2)
+print(f"Loss: {model_loss}, Accuracy: {model.accuracy}")
+                   
+# Define the model - deep neural net
+number_input_features = len(X_train_scaled[0])
+hidden_nodes_layer1 = 8
+hidden_nodes_layer2 = 5
+
+nn_new = tf.keras.models.Sequential()
+
+# First hidden layer
+nn_new.add(
+    tf.keras.layers.Dense(units=hidden_nodes_layer1, input_dim=number_input_features, activation="relu")
+)
+
+# Second hidden layer
+nn_new.add(tf.keras.layers.Dense(units=hidden_nodes_layer2, activation="relu"))
+
+# Output layer
+nn_new.add(tf.keras.layers.Dense(units=1, activation="sigmoid"))
+
 # Compile the model
-nn.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+nn_new.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-#train the model
-fit_model = nn.fit(X_train, y_train, epochs=100)
+# Restore the model weights
+nn_new.load_weights("checkpoints/weights.100.hdf5")
 
-#evaluate the model using test data
-model_loss, model_accuracy = nn.evaluate(X_test, y_test, verbose=2)
+# Evaluate the model using the test data
+model_loss, model_accuracy = nn_new.evaluate(X_test_scaled,y_test,verbose=2)
 print(f"Loss: {model_loss}, Accuracy: {model_accuracy}")
 
